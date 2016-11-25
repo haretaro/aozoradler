@@ -30,7 +30,7 @@ object Main extends App{
       unzip(f, txtFolder)
     })
 
-  val resultFolder = new File("formattedFolder")
+  val resultFolder = new File(formattedFolder)
   resultFolder.mkdirs
   (new File(txtFolder)).listFiles.foreach( f => {
     println("processing %s".format(f))
