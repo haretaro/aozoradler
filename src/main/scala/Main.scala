@@ -12,15 +12,40 @@ import java.io.FileOutputStream
 import java.util.zip.ZipEntry
 import java.io.InputStream
 import java.io.OutputStream
+import java.net.MalformedURLException
 import org.apache.commons.io.FileUtils
 
 object Main extends App{
-  def url = "http://www.aozora.gr.jp/index_pages/person148.html" //夏目漱石の作者ページ
   val zipFolder = "output/zip"
   val txtFolder = "output/txt"
   val formattedFolder = "output/formatted"
 
-  bookLinksOf(url)
+  def soseki = "http://www.aozora.gr.jp/index_pages/person148.html" //夏目漱石の作者ページ
+  def ranpo = "http://www.aozora.gr.jp/index_pages/person1779.html" //江戸川乱歩
+  def lovecraft = "http://www.aozora.gr.jp/index_pages/person1699.html" //ラブクラフト
+  def akutagawa = "http://www.aozora.gr.jp/index_pages/person879.html" //芥川龍之介
+  downloadUnzipAll(soseki, zipFolder, txtFolder)
+  downloadUnzipAll(ranpo, zipFolder, txtFolder)
+  downloadUnzipAll(lovecraft, zipFolder, txtFolder)
+  downloadUnzipAll(akutagawa, zipFolder, txtFolder)
+
+  parseAll(txtFolder, formattedFolder)
+
+  def parseAll(txtFolder: String, formattedFolder: String ) = {
+    val resultFolder = new File(formattedFolder)
+    resultFolder.mkdirs
+    (new File(txtFolder)).listFiles.foreach( f => {
+
+      println("processing %s".format(f))
+      formatTextFile(f, new File(resultFolder, f.getName))
+    })
+  }
+
+  /**
+   * url のファイルをダウンロードして解答
+   * @param url 作者ページのurl
+   */
+  def downloadUnzipAll(url: String, zipFolder: String, txtFolder: String) = bookLinksOf(url)
     .flatMap(l => {
       println("downloading %s".format(l))
       download(l, zipFolder)
@@ -29,13 +54,6 @@ object Main extends App{
       println("unziping %s".format(f))
       unzip(f, txtFolder)
     })
-
-  val resultFolder = new File(formattedFolder)
-  resultFolder.mkdirs
-  (new File(txtFolder)).listFiles.foreach( f => {
-    println("processing %s".format(f))
-    formatTextFile(f, new File(resultFolder, f.getName))
-  })
 
   /**
    * @param author 作者ページのurl
@@ -76,6 +94,11 @@ object Main extends App{
       }
     } catch {
       case e: NoSuchElementException => None
+      case e: MalformedURLException => None
+      case e: Throwable =>{
+        println("hogehoge")
+        None
+      }
     }
   }
 
